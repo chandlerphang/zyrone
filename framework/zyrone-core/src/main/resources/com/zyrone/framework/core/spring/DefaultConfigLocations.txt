@@ -1,0 +1,8 @@
+# 以'#'开头的行，是注释
+# 一行列一个文件
+
+# 持久化配置文件先列出来，确保实体管理器先加载
+zyrone-framework-core-persistence.xml
+
+zyrone-framework-core-context.xml
+zyrone-framework-admin-context.xml

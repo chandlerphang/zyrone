@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+    http://www.springframework.org/schema/tx 
+    http://www.springframework.org/schema/tx/spring-tx-4.2.xsd">
+
+	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" depends-on="zrnCacheManager">
+        <property name="jpaVendorAdapter" ref="jpaVendorAdapter"/>
+        <property name="persistenceUnitManager" ref="persistenceUnitManager"/>
+        <property name="persistenceUnitName" value="zrnPU"/>
+    </bean>
+    <bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
+    <bean id="persistenceUnitManager" class="com.zyrone.framework.core.jpa.MergePersistenceUnitManager">
+        <property name="persistenceUnitPostProcessors" ref="persistenceUnitPostProcessors"/>
+    </bean>
+    <bean id="persistenceUnitPostProcessors" class="org.springframework.beans.factory.config.ListFactoryBean">
+        <property name="sourceList">
+            <list>
+                <bean class="com.zyrone.framework.core.jpa.JPAPropertiesPersistenceUnitPostProcessor"/>
+            </list>
+        </property>
+    </bean> 
+
+    <tx:annotation-driven transaction-manager="zrnTransactionManager"/>
+    <bean id="zrnTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>  
+    </bean>
+   
+    <!-- JPA配置文件，各模块可对该bean进行扩展 -->
+    <bean id="zrnPersistenceXmlLocations" class="org.springframework.beans.factory.config.ListFactoryBean">
+        <property name="sourceList">
+            <list>
+                <value>classpath:/META-INF/persistence-core.xml</value>
+            </list>
+        </property>
+    </bean>
+    
+</beans>

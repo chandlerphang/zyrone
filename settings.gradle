@@ -1,0 +1,8 @@
+include ':common:zyrone-util'
+include ':common:zyrone-xml'
+include ':common:zyrone-logconfig'
+include ':common:zyrone-common-old'
+include ':common:zyrone-velocity'
+include ':framework:zyrone-core'
+include ':framework:zyrone-admin'
+include ':framework:zyrone-admin-old'

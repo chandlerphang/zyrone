@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm 
+    http://java.sun.com/xml/ns/persistence/orm_2_0.xsd" version="2.0">
+    
+    <named-query name="ZRN_READ_ALL_ADMIN_MODULES">
+        <query>SELECT adminModule FROM com.zyrone.framework.admin.security.domain.AdminModule adminModule</query>
+    </named-query>
+    
+    <named-query name="ZRN_READ_ALL_ADMIN_FUNCTIONS">
+        <query>SELECT adminFunction FROM com.zyrone.framework.admin.security.domain.AdminFunction adminFunction</query>
+    </named-query>
+    
+    <named-query name="ZRN_READ_ADMIN_FUNCTION_BY_URI">
+        <query>SELECT adminFunction FROM com.zyrone.framework.admin.security.domain.AdminFunction adminFunction
+                WHERE adminFunction.url = :uri
+        </query>
+    </named-query>
+    
+    <named-query name="ZRN_READ_ADMIN_FUNCTION_BY_FUNCTION_KEY">
+        <query>SELECT adminFunction FROM com.zyrone.framework.admin.security.domain.AdminFunction adminFunction
+            WHERE adminFunction.functionKey = :functionKey
+        </query>
+    </named-query>
+    
+    <named-query name="ZRN_READ_ALL_ADMIN_ROLES">
+        <query>SELECT adminRole FROM com.zyrone.framework.admin.security.domain.AdminRole adminRole</query>
+    </named-query>
+
+    <named-query name="ZRN_READ_ADMIN_USER_BY_LOGIN" >
+        <query>SELECT adminUser FROM com.zyrone.framework.admin.security.domain.AdminUser adminUser
+               WHERE adminUser.login = :login
+        </query>
+    </named-query>
+    
+    <named-query name="ZRN_READ_ADMIN_USER_BY_LOGIN_EMAIL_PHONE" >
+        <query>SELECT adminUser FROM com.zyrone.framework.admin.security.domain.AdminUser adminUser
+               WHERE adminUser.login = :account or adminUser.phoneNumber = :account or adminUser.email = :account
+        </query>
+    </named-query>
+
+    <named-query name="ZRN_READ_ALL_ADMIN_USERS">
+        <query>SELECT adminUser FROM com.zyrone.framework.admin.security.domain.AdminUser adminUser</query>
+    </named-query>
+
+    <named-query name="ZRN_READ_ADMIN_USER_BY_EMAIL">
+        <query>SELECT adminUser FROM com.zyrone.framework.admin.security.domain.AdminUser adminUser
+               WHERE  adminUser.email = :email
+        </query>
+    </named-query>
+    
+    <named-query name="ZRN_READ_ALL_ADMIN_PERMISSIONS">
+        <query>SELECT adminPermission FROM com.zyrone.framework.admin.security.domain.AdminPermission adminPermission</query>
+    </named-query>
+
+    <named-query name="ZRN_COUNT_PERMISSIONS_FOR_USER_BY_TYPE_AND_CEILING_ENTITY" >
+        <query>SELECT COUNT(adminPermission)
+               FROM com.zyrone.framework.admin.security.domain.AdminPermission adminPermission
+               LEFT OUTER JOIN adminPermission.allChildPermissions childPermission
+               LEFT OUTER JOIN childPermission.qualifiedEntities childQualifiedEntity
+               LEFT OUTER JOIN adminPermission.qualifiedEntities qualifiedEntity
+               LEFT OUTER JOIN adminPermission.allRoles role
+               LEFT OUTER JOIN role.allUsers roleUser
+               LEFT OUTER JOIN adminPermission.allUsers permissionUser
+               WHERE (roleUser = :adminUser OR permissionUser = :adminUser) AND
+                     (adminPermission.type = :type OR adminPermission.type = 'ALL' OR 
+                     childPermission.type = :type OR childPermission.type = 'ALL') AND
+                     (qualifiedEntity.ceilingEntityClassName = :ceilingEntity OR childQualifiedEntity.ceilingEntityClassName = :ceilingEntity)
+        </query>
+    </named-query>
+
+    <named-query name="ZRN_COUNT_BY_PERMISSION_AND_CEILING_ENTITY" >
+        <query>SELECT COUNT(adminPermission)
+               FROM com.zyrone.framework.admin.security.domain.AdminPermission adminPermission
+               LEFT OUTER JOIN adminPermission.allChildPermissions childPermission
+               LEFT OUTER JOIN childPermission.qualifiedEntities childQualifiedEntity
+               LEFT OUTER JOIN adminPermission.qualifiedEntities qualifiedEntity
+               WHERE adminPermission.name IN (:permissionNames) AND
+                     (qualifiedEntity.ceilingEntityClassName = :ceilingEntity OR childQualifiedEntity.ceilingEntityClassName = :ceilingEntity)
+        </query>
+    </named-query>
+
+    <named-query name="ZRN_COUNT_PERMISSIONS_BY_TYPE_AND_CEILING_ENTITY" >
+        <query>SELECT COUNT(adminPermission)
+               FROM com.zyrone.framework.admin.security.domain.AdminPermission adminPermission
+               LEFT OUTER JOIN adminPermission.allChildPermissions childPermission
+               LEFT OUTER JOIN childPermission.qualifiedEntities childQualifiedEntity
+               LEFT OUTER JOIN adminPermission.qualifiedEntities qualifiedEntity
+               WHERE (adminPermission.type = :type OR adminPermission.type = 'ALL' OR
+                     childPermission.type = :type OR childPermission.type = 'ALL') AND
+                     (qualifiedEntity.ceilingEntityClassName = :ceilingEntity OR childQualifiedEntity.ceilingEntityClassName = :ceilingEntity)
+        </query>
+    </named-query>
+
+</entity-mappings>

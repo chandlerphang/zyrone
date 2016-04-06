@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence 
+             http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+             version="2.0">
+             
+    <persistence-unit name="zrnPU" transaction-type="RESOURCE_LOCAL">
+     	<non-jta-data-source>jdbc/web</non-jta-data-source>
+        <mapping-file>config/zyrone/admin/jpa/query/admin.orm.xml</mapping-file>
+        <class>com.zyrone.framework.admin.security.domain.ForgotPasswordSecurityTokenImpl</class>
+        <class>com.zyrone.framework.admin.security.domain.AdminPermissionImpl</class>
+        <class>com.zyrone.framework.admin.security.domain.AdminPermissionQualifiedEntityImpl</class>
+        <class>com.zyrone.framework.admin.security.domain.AdminRoleImpl</class>
+        <class>com.zyrone.framework.admin.security.domain.AdminUserImpl</class>
+        <class>com.zyrone.framework.admin.security.domain.AdminModuleImpl</class>
+        <class>com.zyrone.framework.admin.security.domain.AdminFunctionImpl</class>
+        <exclude-unlisted-classes/>
+    </persistence-unit>
+
+</persistence>

@@ -1,0 +1,33 @@
+.settings
+bin
+.gradle
+/common/zyrone-common-old/
+/common/zyrone-velocity/
+/framework/zyrone-admin-old
+
+/build/
+/common/zyrone-*/build/
+/framework/zyrone-*/build/
+
+/target/
+/common/zyrone-*/target/
+/framework/zyrone-*/target/
+
+/src/asciidoc/build
+
+
+# Eclipse artifacts, including WTP generated manifests
+.classpath
+.project
+/common/zyrone-*/src/main/java/META-INF/MANIFEST.MF
+/framework/zyrone-*/src/main/java/META-INF/MANIFEST.MF
+
+# IDEA artifacts and output dirs
+*.iml
+*.ipr
+*.iws
+.idea
+out
+test-output
+atlassian-ide-plugin.xml
+.gradletasknamecache

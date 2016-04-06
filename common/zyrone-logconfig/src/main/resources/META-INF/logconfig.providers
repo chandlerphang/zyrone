@@ -1,0 +1,2 @@
+logback=com.zyrone.logconfig.logback.LogbackConfigurator
+log4j=com.zyrone.logconfig.log4j.Log4jConfigurator
