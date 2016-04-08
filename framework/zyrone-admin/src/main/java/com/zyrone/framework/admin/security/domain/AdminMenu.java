@@ -10,14 +10,14 @@ import java.util.List;
  */
 public class AdminMenu {
 
-    private List<AdminModule> adminModules = new ArrayList<AdminModule>();
+    private List<AdminFunction> adminFunctions = new ArrayList<AdminFunction>();
 
-    public List<AdminModule> getAdminModules() {
-        return adminModules;
+    public List<AdminFunction> getAdminFunctions() {
+        return adminFunctions;
     }
 
-    public void setAdminModule(List<AdminModule> adminModules) {
-        this.adminModules = adminModules;
+    public void setAdminFunctions(List<AdminFunction> adminFunctions) {
+        this.adminFunctions = adminFunctions;
     }
     
 }

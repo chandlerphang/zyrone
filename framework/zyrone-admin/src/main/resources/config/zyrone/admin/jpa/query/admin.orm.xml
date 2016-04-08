@@ -6,7 +6,7 @@
     http://java.sun.com/xml/ns/persistence/orm_2_0.xsd" version="2.0">
     
     <named-query name="ZRN_READ_ALL_ADMIN_MODULES">
-        <query>SELECT adminModule FROM com.zyrone.framework.admin.security.domain.AdminModule adminModule</query>
+        <query>SELECT adminFunction FROM com.zyrone.framework.admin.security.domain.AdminFunction adminFunction WHERE adminFunction.parent IS NULL</query>
     </named-query>
     
     <named-query name="ZRN_READ_ALL_ADMIN_FUNCTIONS">

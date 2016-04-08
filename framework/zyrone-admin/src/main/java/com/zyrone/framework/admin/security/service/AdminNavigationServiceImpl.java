@@ -1,6 +1,5 @@
 package com.zyrone.framework.admin.security.service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -15,13 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.zyrone.framework.admin.security.domain.AdminFunction;
 import com.zyrone.framework.admin.security.domain.AdminMenu;
-import com.zyrone.framework.admin.security.domain.AdminModule;
-import com.zyrone.framework.admin.security.domain.AdminModuleDTO;
-import com.zyrone.framework.admin.security.domain.AdminModuleImpl;
 import com.zyrone.framework.admin.security.domain.AdminPermission;
 import com.zyrone.framework.admin.security.domain.AdminRole;
 import com.zyrone.framework.admin.security.domain.AdminUser;
 import com.zyrone.framework.admin.security.repo.AdminNavigationRepo;
+
+import static com.zyrone.util.CollectionUtil.*;
 
 /**
  *
@@ -50,62 +48,66 @@ public class AdminNavigationServiceImpl implements AdminNavigationService {
     @Override
     public AdminMenu buildMenu(AdminUser adminUser) {
         AdminMenu adminMenu = new AdminMenu();
-        List<AdminModule> modules = adminNavigationRepo.readAllAdminModules();
+        List<AdminFunction> modules = adminNavigationRepo.readAllAdminModules();
         populateAdminMenu(adminUser, adminMenu, modules);
         return adminMenu;
     }
 
-    protected void populateAdminMenu(AdminUser adminUser, AdminMenu adminMenu, List<AdminModule> modules) {
-        for (AdminModule module : modules) {
-            List<AdminFunction> functions = buildAuthorizedFunctionsList(adminUser, module);
-            if (functions != null && functions.size() > 0) {
-                AdminModuleDTO adminModuleDto = ((AdminModuleImpl) module).getAdminModuleDTO();
-                adminMenu.getAdminModules().add(adminModuleDto);
-                adminModuleDto.setFunctions(functions);
+    protected void populateAdminMenu(AdminUser adminUser, AdminMenu adminMenu, List<AdminFunction> modules) {
+        List<AdminFunction> functions = createArrayList();
+    	for (AdminFunction module : modules) {
+        	AdminFunction funcTree = buildAuthorizedFunctionTree(adminUser, module);
+            if (funcTree != null) {
+                functions.add(funcTree);
             }
         }
         
-        Collections.sort(adminMenu.getAdminModules(), new Comparator<AdminModule>() {
-			@Override
-			public int compare(AdminModule o1, AdminModule o2) {
-				return o1.getDisplayOrder().compareTo(o2.getDisplayOrder());
-			}
-        });
-    }
-
-    protected List<AdminFunction> buildAuthorizedFunctionsList(AdminUser adminUser, AdminModule module) {
-        List<AdminFunction> authorizedFunctions = new ArrayList<AdminFunction>();
-        for (AdminFunction function : module.getFunctions()) {
-            if (isUserAuthorizedToViewFunction(adminUser, function)) {
-            	authorizedFunctions.add(function);
-            }
-        }
-
-        Collections.sort(authorizedFunctions, FUNCTION_COMPARATOR);
-        return authorizedFunctions;
-    }
-
-    @Override
-    public boolean isUserAuthorizedToViewModule(AdminUser adminUser, AdminModule module) {
-        List<AdminFunction> functions = module.getFunctions();
-        if (functions != null && !functions.isEmpty()) {
-            for (AdminFunction function : functions) {
-                if (isUserAuthorizedToViewFunction(adminUser, function)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        Collections.sort(functions, FUNCTION_COMPARATOR);
+        adminMenu.setAdminFunctions(functions);
     }
     
+    protected AdminFunction buildAuthorizedFunctionTree(AdminUser adminUser, AdminFunction root) {
+    	/** 先判断对root结点本身是否具有权限，如果没有的话，直接返回null，表示不予显示，没必要还对它的子结点进行权限判断 */
+        if(isUserAuthorizedToViewFunction(adminUser, root)) {
+        	/** 这里做了一个逻辑假设：一个Function如果没有任何子结点的话，就表示它是用户最终会点击的“菜单项”，不会是组织“菜单项”的中间模块
+        	 *  事实上这个假设不一定成立，比如创建了一个中间模块，但忘记给它添加子结点了，中间模块的url属性值都是无效的 */
+        	if(root.getChildren() != null && root.getChildren().size() > 0) {
+        		List<AdminFunction> authorizedFunctions = createArrayList();
+        		for(AdminFunction func : root.getChildren()) {
+        			AdminFunction funcTree = buildAuthorizedFunctionTree(adminUser, func);
+        			if(funcTree != null) {
+        				authorizedFunctions.add(funcTree);
+        			}
+             	}
+        		
+        		if(authorizedFunctions.isEmpty()) {
+        			/** 没有任何被授权的子Function结点, 该root结点也不应展示 */
+        			return null;
+        		} else {
+        			Collections.sort(authorizedFunctions, FUNCTION_COMPARATOR);
+        			
+        			AdminFunction temp = root.copyWithoutHierarchy();
+        			temp.setParent(root.getParent());
+        			temp.setChildren(authorizedFunctions);
+        			return temp;
+        		}
+        	} else {
+        		AdminFunction temp = root.copyWithoutHierarchy();
+    			temp.setParent(root.getParent());
+        		return temp;
+            }
+        } else {
+        	return null;
+        }
+    }
+
     @Override
     public AdminFunction findAdminFunctionByURI(String uri) {
         return adminNavigationRepo.readAdminFunctionByURI(uri);
     }
     
     @Override
-    public AdminFunction findAdminFunctionByFunctionKey(String functionKey) {
+    public AdminFunction findAdminFunctionByKey(String functionKey) {
         return adminNavigationRepo.readAdminFunctionByFunctionKey(functionKey);
     }
     
@@ -162,9 +164,9 @@ public class AdminNavigationServiceImpl implements AdminNavigationService {
     
     @Override
     public List<AdminFunction> findAllAdminFunctions() {
-        List<AdminFunction> sections = adminNavigationRepo.readAllAdminFunctions();
-        Collections.sort(sections, FUNCTION_COMPARATOR);
-        return sections;
+        List<AdminFunction> functions = adminNavigationRepo.readAllAdminFunctions();
+        Collections.sort(functions, FUNCTION_COMPARATOR);
+        return functions;
     }
 
     protected boolean checkPermissions(List<AdminPermission> authorizedPermissions, AdminPermission permission) {
@@ -213,5 +215,16 @@ public class AdminNavigationServiceImpl implements AdminNavigationService {
 	        return o1.getId().compareTo(o2.getId());
 		}
     };
+
+	@Override
+	public List<Long> findAncestorIds(String funcKey) {
+		AdminFunction function = adminNavigationRepo.readAdminFunctionByFunctionKey(funcKey);
+		List<Long> ids = createArrayList();
+		while(function != null) {
+			ids.add(0, function.getId());
+			function = function.getParent();
+		}
+		return ids;
+	}
 
 }

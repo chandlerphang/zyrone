@@ -13,8 +13,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
 import com.zyrone.framework.admin.security.domain.AdminFunction;
-import com.zyrone.framework.admin.security.domain.AdminModule;
-import com.zyrone.util.repo.TypedQueryBuilder;
 
 @Repository("zrnAdminNavigationRepo")
 public class AdminNavigationRepoImpl implements AdminNavigationRepo {
@@ -33,21 +31,13 @@ public class AdminNavigationRepoImpl implements AdminNavigationRepo {
     }
 
     @Override
-    public List<AdminModule> readAllAdminModules() {
-        TypedQuery<AdminModule> query = em.createNamedQuery("ZRN_READ_ALL_ADMIN_MODULES", AdminModule.class);
+    public List<AdminFunction> readAllAdminModules() {
+        TypedQuery<AdminFunction> query = em.createNamedQuery("ZRN_READ_ALL_ADMIN_MODULES", AdminFunction.class);
         query.setHint(QueryHints.HINT_CACHEABLE, true);
-        List<AdminModule> modules = query.getResultList();
+        List<AdminFunction> modules = query.getResultList();
         return modules;
     }
     
-    @Override
-    public AdminModule readAdminModuleByModuleKey(String moduleKey) {
-        TypedQuery<AdminModule> q = new TypedQueryBuilder<AdminModule>(AdminModule.class, "am")
-            .addRestriction("am.moduleKey", "=", moduleKey)
-            .toQuery(em);
-        return q.getSingleResult();
-    }
-
     @Override
     public List<AdminFunction> readAllAdminFunctions() {
     	TypedQuery<AdminFunction> query = em.createNamedQuery("ZRN_READ_ALL_ADMIN_FUNCTIONS", AdminFunction.class);

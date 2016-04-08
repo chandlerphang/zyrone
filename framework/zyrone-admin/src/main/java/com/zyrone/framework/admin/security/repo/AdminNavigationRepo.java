@@ -3,7 +3,6 @@ package com.zyrone.framework.admin.security.repo;
 import java.util.List;
 
 import com.zyrone.framework.admin.security.domain.AdminFunction;
-import com.zyrone.framework.admin.security.domain.AdminModule;
 
 /**
  *
@@ -11,7 +10,12 @@ import com.zyrone.framework.admin.security.domain.AdminModule;
  */
 public interface AdminNavigationRepo {
 
-    List<AdminModule> readAllAdminModules();
+	/**
+	 * <p>
+	 * 读取所有系统模块，模块就是没有父级的AdminFunction
+	 * </p>
+	 */
+    List<AdminFunction> readAllAdminModules();
 
     List<AdminFunction> readAllAdminFunctions();
     
@@ -24,7 +28,5 @@ public interface AdminNavigationRepo {
     AdminFunction save(AdminFunction adminFunction);
 
     void remove(AdminFunction adminFunction);
-
-    AdminModule readAdminModuleByModuleKey(String moduleKey);
 
 }

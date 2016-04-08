@@ -19,6 +19,10 @@ public interface AdminFunction extends Serializable {
     String getFunctionKey();
     
     void setFunctionKey(String functionKey);
+    
+    String getIcon();
+
+    void setIcon(String icon);
 
     String getUrl();
     
@@ -27,17 +31,23 @@ public interface AdminFunction extends Serializable {
     List<AdminPermission> getPermissions();
     
     void setPermissions(List<AdminPermission> permissions);
-
-    AdminModule getModule();
     
-    void setModule(AdminModule module);
-
-    String getCeilingEntity();
+    AdminFunction getParent();
     
-    void setCeilingEntity(String ceilingEntity);
+    void setParent(AdminFunction parent);
+    
+    List<AdminFunction> getChildren();
+
+    void setChildren(List<AdminFunction> functions);
 
     Integer getDisplayOrder();
     
     void setDisplayOrder(Integer displayOrder);
+    
+    String getCeilingEntity();
+    
+    void setCeilingEntity(String ceilingEntity);
+    
+    AdminFunction copyWithoutHierarchy();
     
 }

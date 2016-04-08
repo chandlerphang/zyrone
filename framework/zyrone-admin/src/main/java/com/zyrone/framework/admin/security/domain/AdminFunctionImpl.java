@@ -1,6 +1,5 @@
 package com.zyrone.framework.admin.security.domain;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -15,17 +14,19 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 
+import static com.zyrone.util.CollectionUtil.*;
+
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "ZRN_ADMIN_FUNCITON", indexes = {
-	@Index(name="ADMINFUNCITON_NAME_INDEX", columnList="NAME"),
-	@Index(name="ADMINFUNCITON_MODULE_INDEX", columnList="ADMIN_MODULE_ID")
+		 @Index(name="ADMINFUNCITON_NAME_INDEX", columnList="NAME"),
 })
 public class AdminFunctionImpl implements AdminFunction {
 
@@ -51,17 +52,24 @@ public class AdminFunctionImpl implements AdminFunction {
 
     @Column(name = "URL", nullable=true)
     protected String url;
+    
+    @Column(name = "ICON", nullable=true)
+    protected String icon;
 
-    @ManyToOne(optional=false, targetEntity = AdminModuleImpl.class)
-    @JoinColumn(name = "ADMIN_MODULE_ID")
-    protected AdminModule module;
+    @ManyToOne(targetEntity = AdminFunctionImpl.class)
+    @JoinColumn(name = "PARENT_ID")
+    protected AdminFunction parent;
+    
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, targetEntity = AdminFunctionImpl.class)
+    @BatchSize(size = 10)
+    protected List<AdminFunction> children = createArrayList();
 
     @ManyToMany(fetch = FetchType.LAZY, targetEntity = AdminPermissionImpl.class)
     @JoinTable(name = "ZRN_ADMIN_FUNC_PERM_XREF", 
     	joinColumns = @JoinColumn(name = "ADMIN_FUNCTION_ID", referencedColumnName = "ADMIN_FUNCTION_ID"), 
     	inverseJoinColumns = @JoinColumn(name = "ADMIN_PERMISSION_ID", referencedColumnName = "ADMIN_PERMISSION_ID"))
     @BatchSize(size = 50)
-    protected List<AdminPermission> permissions = new ArrayList<AdminPermission>();
+    protected List<AdminPermission> permissions = createArrayList();
 
     @Column(name = "CEILING_ENTITY", nullable = true)
     protected String ceilingEntity;
@@ -109,16 +117,6 @@ public class AdminFunctionImpl implements AdminFunction {
     }
 
     @Override
-    public AdminModule getModule() {
-        return module;
-    }
-
-    @Override
-    public void setModule(AdminModule module) {
-        this.module = module;
-    }
-
-    @Override
     public List<AdminPermission> getPermissions() {
         return permissions;
     }
@@ -146,6 +144,49 @@ public class AdminFunctionImpl implements AdminFunction {
     @Override
     public void setDisplayOrder(Integer displayOrder) {
         this.displayOrder = displayOrder;
+    }
+
+	@Override
+	public AdminFunction getParent() {
+		return parent;
+	}
+
+	@Override
+	public void setParent(AdminFunction parent) {
+		this.parent = parent;
+	}
+
+	@Override
+	public List<AdminFunction> getChildren() {
+		return children;
+	}
+
+	@Override
+	public void setChildren(List<AdminFunction> functions) {
+		this.children = functions;
+	}
+
+	@Override
+	public String getIcon() {
+		return icon;
+	}
+
+	@Override
+	public void setIcon(String icon) {
+		this.icon = icon;
+	}
+	
+	@Override
+	public AdminFunction copyWithoutHierarchy() {
+		AdminFunctionImpl dto = new AdminFunctionImpl();
+		dto.setId(id);
+		dto.setName(name);
+		dto.setFunctionKey(functionKey);
+		dto.setIcon(icon);
+		dto.setUrl(url);
+        dto.setDisplayOrder(displayOrder);
+        dto.setCeilingEntity(ceilingEntity);
+        return dto;
     }
     
 }
